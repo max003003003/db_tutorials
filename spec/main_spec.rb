@@ -63,7 +63,7 @@ describe 'database' do
         ]
         result = run_script(script)
         expect(result).to match_array([
-            "db > String is too long",
+            "db > String is too long.",
             "db > Executed.",
             "db > ",
         ])
