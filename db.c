@@ -53,8 +53,13 @@ const uint32_t ROWS_PER_PAGE = PAGE_SIZE / ROW_SIZE;
 const uint32_t TABLE_MAX_ROWS = ROWS_PER_PAGE * TABLE_MAX_PAGES;
 
 typedef struct {
+    int file_descriptor;
+    uint32_t file_length;
+    void* pages[TABLE_MAX_PAGES];
+} Pager;
+typedef struct {
   uint32_t num_rows;
-  void *pages[TABLE_MAX_PAGES];
+  Pager* pager;
 } Table;
 
 void print_row(Row *row) {
@@ -84,15 +89,38 @@ void *row_slot(Table *table, uint32_t row_num) {
   return page + byte_offset;
 }
 
-Table *new_table() {
+Table *db_open(const char* filename) {
+  Pager* pager = pager_open(filename);
+  uint32_t num_rows = pager->file_length / ROW_SIZE;
+
   Table *table = malloc(sizeof(Table));
-  table->num_rows = 0;
-  for (uint32_t i = 0; i < TABLE_MAX_PAGES; i++) {
-    table->pages[i] = NULL;
-  }
+  table->pager = pager;
+  table->num_rows = num_rows;
   return table;
 }
+Pager* pager_open(const char* filename){
+    int fd = open(filename,
+            O_RDWR |
+            O_CREAT,
+            S_IWUSR |
+            S_IRUSR
+            );
+    if (fd == -1) {
+       printf("Unable to open file\n");
+       exit(EXIT_FAILURE);
+    }
+    off_t file_length = lseek(fd, 0, SEEK_END);
 
+    Pager* pager = malloc(sizeof(Pager));
+    pager->file_descriptor = fd;
+    pager->file_length = file_length;
+
+
+    for(uint32_t i =0; i< TABLE_MAX_PAGES; i++){
+        pager->pages[i] = NULL;
+    }
+    return pager;
+}
 void free_table(Table *table) {
   for (int i = 0; table->pages[i]; i++) {
     free(table->pages[i]);
