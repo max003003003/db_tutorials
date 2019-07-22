@@ -204,7 +204,7 @@ ExecuteResult execute_statement(Statement *statement, Table *table)
     }
 }
 
-void print_promt() { printf("db > "); }
+void print_prompt() { printf("db > "); }
 
 void read_input(InputBuffer *input_buffer)
 {
@@ -229,11 +229,11 @@ void close_input_buffer(InputBuffer *input_buffer)
 
 int main(int argc, char *argv[])
 {
-    Table *table = new_table();
-    InputBuffer *input_buffer = new_input_buffer();
+    Table* table = new_table();
+    InputBuffer* input_buffer = new_input_buffer();
     while (true)
     {
-        print_promt();
+        print_prompt();
         read_input(input_buffer);
 
         if (input_buffer->buffer[0] == '.')
