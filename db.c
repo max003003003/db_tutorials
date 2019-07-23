@@ -7,6 +7,11 @@
 #include <string.h>
 #include <unistd.h>
 typedef struct {
+    Table* table;
+    uint32_t row_num;
+    bool end_of_table;
+} Cursor;
+typedef struct {
   char *buffer;
   size_t buffer_length;
   ssize_t input_length;
@@ -63,7 +68,13 @@ typedef struct {
   uint32_t num_rows;
   Pager *pager;
 } Table;
-
+Cursor* table_start(Table* table){
+    Cursor* cursor = malloc(sizeof(Cursor));
+    cursor->table - table;
+    cursor->row_num = 0;
+    cursor->end_of_table = (table->num_rows == 0);
+    return cursor;
+}
 void print_row(Row *row) {
   printf("(%d, %s, %s)\n", row->id, row->username, row->email);
 }
