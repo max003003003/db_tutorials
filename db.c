@@ -70,9 +70,16 @@ typedef struct {
 } Table;
 Cursor* table_start(Table* table){
     Cursor* cursor = malloc(sizeof(Cursor));
-    cursor->table - table;
+    cursor->table = table;
     cursor->row_num = 0;
     cursor->end_of_table = (table->num_rows == 0);
+    return cursor;
+}
+Cursor* table_end(Table* table) {
+    Cursor* cursor = malloc(sizeof(Cursor));
+    cursor->table = table;
+    cursor->row_num = table->num_rows;
+    cursor->end_of_table = true;
     return cursor;
 }
 void print_row(Row *row) {
