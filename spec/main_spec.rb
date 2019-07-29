@@ -6,11 +6,16 @@ describe 'database' do
         raw_output = nil
         IO.popen("./db test.db", "r+") do |pipe|
             commands.each do |command|
-                pipe.puts command
+                begin
+                    pipe.puts command
+                rescue Errno::EPIPE
+                    break
+                end
             end
             pipe.close_write
             raw_output = pipe.gets(nil)
         end
+        puts raw_output
         raw_output.split("\n")
     end
 
@@ -34,8 +39,11 @@ describe 'database' do
         end
         script << ".exit"
         result = run_script(script)
-        expect(result[-2]).to eq('db > Error: Table full.')
-
+        puts result
+        expect(result.last(2)).to match_array([
+            "db > Executed.",
+            "db > Need to implement updating perent after split",
+        ])
 
     end
 
@@ -170,8 +178,9 @@ describe 'database' do
         script << ".btree"
         script << "insert 15 user15 person15@example.com"
         script << ".exit"
-        result = run_script(script)
-
+        #result = run_script(script)
+        puts script
+        puts result
         expect(result[14...(result.length)]).to match_array([
             "db > Tree:",
             "- internal (size 1)",
@@ -192,7 +201,8 @@ describe 'database' do
             "  - 12",
             "  - 13",
             "  - 14",
-            "db > Need to implement searching an internal node",
+            "db > Executed.",
+            "db > ",
         ])
     end
 end
