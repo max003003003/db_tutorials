@@ -11,7 +11,11 @@ typedef struct {
   size_t buffer_length;
   ssize_t input_length;
 } InputBuffer;
-typedef enum { EXECUTE_SUCCESS, EXECUTE_TABLE_FULL } ExecuteResult;
+typedef enum {
+  EXECUTE_SUCCESS,
+  EXECUTE_DUPLICATE_KEY,
+  EXECUTE_TABLE_FULL,
+} ExecuteResult;
 typedef enum {
   META_COMMAND_SUCCESS,
   META_COMMAND_UNRECOGNIZED_COMMAND
@@ -148,7 +152,10 @@ void *leaf_node_value(void *node, uint32_t cell_num) {
   return leaf_node_cell(node, cell_num) + LEAF_NODE_KEY_SIZE;
 }
 
-void initialize_leaf_node(void *node) { *leaf_node_num_cells(node) = 0; }
+void initialize_leaf_node(void *node) {
+  set_node_type(node, NODE_LEAF);
+  *leaf_node_num_cells(node) = 0;
+}
 
 void leaf_node_insert(Cursor *cursor, uint32_t key, Row *value) {
   void *node = get_page(cursor->table->pager, cursor->page_num);
@@ -467,6 +474,15 @@ Cursor *leaf_node_find(Table *table, uint32_t page_num, uint32_t key) {
   cursor->cell_num = min_index;
   return cursor;
 }
+
+NodeType get_node_type(void *node) {
+  uint8_t value = *((uint8_t)(node + NODE_TYPE_OFFSET));
+  return (NodeType)value;
+}
+void set_node_type(void *node, NodeType type) {
+  uint8_t value = type;
+  *((uint8_t *)(node + NODE_TYPE_OFFSET)) = value;
+}
 void read_input(InputBuffer *input_buffer) {
   ssize_t byte_read =
       getline(&(input_buffer->buffer), &(input_buffer->buffer_length), stdin);
@@ -527,6 +543,9 @@ int main(int argc, char *argv[]) {
     switch (execute_statement(&statement, table)) {
       case (EXECUTE_SUCCESS):
         printf("Executed.\n");
+        break;
+      case (EXECUTE_DUPLICATE_KEY):
+        printf("Error: Duplicate key.\n");
         break;
       case (EXECUTE_TABLE_FULL):
         printf("Error: Table full.\n");
