@@ -157,9 +157,9 @@ describe 'database' do
         expect(result).to match_array([
             "db > Executed.",
             "db > Error: Duplicate key.",
-            "db > (1, user1, person@example.com)",
+            "db > (1, user1, person1@example.com)",
             "Executed.",
-            "db >",
+            "db > ",
         ])
     end
 end
