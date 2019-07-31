@@ -6,6 +6,7 @@ describe 'database' do
         raw_output = nil
         IO.popen("./db test.db", "r+") do |pipe|
             commands.each do |command|
+
                 begin
                     pipe.puts command
                 rescue Errno::EPIPE
@@ -15,7 +16,6 @@ describe 'database' do
             pipe.close_write
             raw_output = pipe.gets(nil)
         end
-        puts raw_output
         raw_output.split("\n")
     end
 
@@ -178,10 +178,10 @@ describe 'database' do
         script << ".btree"
         script << "insert 15 user15 person15@example.com"
         script << ".exit"
-        #result = run_script(script)
-        puts script
-        puts result
-        expect(result[14...(result.length)]).to match_array([
+        result = run_script(script)
+
+
+        expect(result[14...(result.length)]).to eq([
             "db > Tree:",
             "- internal (size 1)",
             " - leaf (size 7)",
