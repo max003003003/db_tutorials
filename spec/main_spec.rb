@@ -39,10 +39,9 @@ describe 'database' do
         end
         script << ".exit"
         result = run_script(script)
-        puts result
         expect(result.last(2)).to match_array([
             "db > Executed.",
-            "db > Need to implement updating perent after split",
+            "db > Need to implement updating parent after split",
         ])
 
     end
